@@ -1,0 +1,18 @@
+# 密钥绝不入库
+.env
+
+# 数据与缓存
+data/
+*.db
+*.db-wal
+*.db-shm
+
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+
+# 编辑器
+.vscode/
+.idea/

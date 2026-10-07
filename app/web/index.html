@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>GitHub 排行榜 · AI 通俗解读</title>
+<link rel="stylesheet" href="/static/style.css">
+<script>
+  // 首屏前就把主题和字号套上，否则会先闪一下默认样式再跳变。
+  // 这段必须内联在 <head>，放到外部脚本就晚了。
+  (function () {
+    try {
+      var t = localStorage.getItem('ghrank.theme') || 'dark';
+      document.documentElement.setAttribute('data-theme', t);
+      var f = localStorage.getItem('ghrank.fontScale') || '1.2';
+      document.documentElement.style.setProperty('--font-scale', f);
+    } catch (e) { /* 隐私模式下 localStorage 可能抛异常，忽略即可 */ }
+  })();
+</script>
+</head>
+<body>
+
+<header class="topbar">
+  <div class="brand">
+    <span class="logo">◈</span>
+    <div>
+      <h1>GitHub 排行榜</h1>
+      <p class="sub">每天自动刷新 · AI 通读 README 后生成的通俗说明</p>
+    </div>
+  </div>
+
+  <div class="topbar-right">
+    <div class="status-strip" id="statusStrip">
+      <span class="chip" id="chipRaw">抓取源 <b>·</b></span>
+      <span class="chip" id="chipLlm">模型 <b>·</b></span>
+    </div>
+
+    <div class="view-controls">
+      <div class="font-ctl" role="group" aria-label="字号">
+        <button type="button" data-fs="1">标准</button>
+        <button type="button" data-fs="1.2">大</button>
+        <button type="button" data-fs="1.4">特大</button>
+      </div>
+      <button class="btn btn-ghost icon-btn" id="btnTheme"
+              title="切换深色 / 浅色主题" aria-label="切换主题">🌙</button>
+    </div>
+
+    <button class="btn btn-primary" id="btnRefresh">
+      <span class="spin" hidden></span><span class="label">立即刷新</span>
+    </button>
+  </div>
+</header>
+
+<nav class="tabs">
+  <button class="tab active" data-period="daily">📈 本日榜</button>
+  <button class="tab" data-period="weekly">📊 本周榜</button>
+  <div class="tab-underline"></div>
+</nav>
+
+<div class="toolbar">
+  <label class="date-wrap">
+    榜单日期
+    <select id="dateSelect"><option value="">最新</option></select>
+  </label>
+  <span class="meta" id="listMeta"></span>
+</div>
+
+<!-- 数据过期告警：抓取失败时榜单会停留在旧日期，这里必须让人一眼看出来 -->
+<div class="stale-banner" id="staleBanner" hidden>
+  <span class="stale-icon">⚠</span>
+  <span class="stale-text" id="staleText"></span>
+  <button class="btn btn-mini" id="btnRetryNow">立即重试</button>
+</div>
+
+<main>
+  <div id="loading" class="state-box" hidden>
+    <div class="spinner"></div>
+    <p id="loadingText">加载中…</p>
+  </div>
+
+  <div id="empty" class="state-box" hidden>
+    <div class="empty-icon">📭</div>
+    <h3>这个周期还没有数据</h3>
+    <p>点右上角「立即刷新」抓一次，或者等每天 <b id="refreshHour">9:17</b> 自动跑。</p>
+  </div>
+
+  <ol id="list" class="rank-list"></ol>
+</main>
+
+<!-- 项目详情弹窗 -->
+<div class="modal-backdrop" id="modal" hidden>
+  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="mTitle">
+    <button class="modal-close" id="btnClose" aria-label="关闭">✕</button>
+
+    <div class="modal-head">
+      <div class="modal-repo" id="mRepo"></div>
+      <a class="modal-desc" id="mDesc" target="_blank" rel="noopener"></a>
+      <div class="modal-meta" id="mMeta"></div>
+    </div>
+
+    <div class="modal-body" id="mBody">
+      <div class="gen-state" id="genState">
+        <div class="spinner small"></div> 正在读取说明…
+      </div>
+    </div>
+
+    <div class="modal-foot">
+      <span class="grounded" id="mGrounded"></span>
+      <div class="foot-actions">
+        <button class="btn btn-ghost" id="btnReadme">查看 README 原文</button>
+        <a class="btn btn-ghost" id="btnGithub" target="_blank" rel="noopener">在 GitHub 打开 ↗</a>
+      </div>
+    </div>
+
+    <pre class="readme-view" id="readmeView" hidden></pre>
+  </div>
+</div>
+
+<div id="toast" class="toast" hidden></div>
+
+<script src="/static/app.js"></script>
+</body>
+</html>

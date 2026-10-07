@@ -1,0 +1,24 @@
+[project]
+name = "gh-rank"
+version = "0.1.0"
+description = "本地 GitHub 排行榜：每日自动刷新 + AI 生成的通俗项目说明"
+requires-python = ">=3.11"
+dependencies = [
+    "fastapi>=0.115",
+    "uvicorn[standard]>=0.32",
+    "httpx>=0.27",
+    "beautifulsoup4>=4.12",
+    "lxml>=5.3",
+    "apscheduler>=3.10",
+    "python-dotenv>=1.0",
+]
+
+[project.scripts]
+gh-rank = "app.cli:main"
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["app"]
